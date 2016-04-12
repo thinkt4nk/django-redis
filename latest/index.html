@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="generator" content="Asciidoctor 1.5.4">
 <meta name="author" content="Andrey Antukh, &lt;niwi@niwi.be&gt;">
 <title>django-redis documentation</title>
 <style>
@@ -80,7 +80,7 @@
 <h1>django-redis documentation</h1>
 <div class="details">
 <span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.be&gt;</span><br>
-<span id="revdate">4.2.0</span>
+<span id="revdate">4.4.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -98,6 +98,7 @@
 <li><a href="#_installation">2.1. Installation</a></li>
 <li><a href="#_configure_as_cache_backend">2.2. Configure as cache backend</a></li>
 <li><a href="#_configure_as_session_backend">2.3. Configure as session backend</a></li>
+<li><a href="#_testing_with_django_redis">2.4. Testing with django-redis</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_usage">3. Advanced usage</a>
@@ -118,6 +119,7 @@
 <li><a href="#_pluggable_parsers">3.14. Pluggable parsers</a></li>
 <li><a href="#_pluggable_clients">3.15. Pluggable clients</a></li>
 <li><a href="#_pluggable_serializer">3.16. Pluggable serializer</a></li>
+<li><a href="#_pluggable_redis_client">3.17. Pluggable redis client</a></li>
 </ul>
 </li>
 <li><a href="#license">4. License</a></li>
@@ -185,7 +187,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Supported stable version: <strong>4.2.0</strong></p>
+<p>Supported stable version: <strong>4.4.0</strong></p>
 </li>
 <li>
 <p>Supported stable version: <strong>3.8.4</strong></p>
@@ -215,7 +217,7 @@ fix releases and are should contain only bug fixes. No new features.</p>
 <p><strong>django-redis 3.8.x</strong> will maintain support for django 1.4, 1.5, 1.6, 1.7 (and maybe 1.8)</p>
 </li>
 <li>
-<p><strong>django-redis 4.2.0</strong> will maintain support for django 1.6, 1.7 and 1.8</p>
+<p><strong>django-redis 4.4.0</strong> will maintain support for django 1.6, 1.7, 1.8 and 1.9</p>
 </li>
 </ul>
 </div>
@@ -343,6 +345,39 @@ django-redis 3.8.x, <code>redis_cache</code> module is deprecated in favor to <c
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_testing_with_django_redis">2.4. Testing with django-redis</h3>
+<div class="paragraph">
+<p><code>django-redis</code> supports customizing the underlying Redis client (see <a href="#_pluggable_redis_client">Pluggable redis client</a>).
+This can be used for testing purposes, e.g., by replacing the default client with <code>fakeredis</code>
+(<a href="https://github.com/jamesls/fakeredis" class="bare">https://github.com/jamesls/fakeredis</a>) or <code>mockredis</code> (<a href="https://github.com/locationlabs/mockredis" class="bare">https://github.com/locationlabs/mockredis</a>).
+Doing so allows you to run your integration tests without depending on a real Redis server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example setup using <code>fakeredis</code>:</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span class="tok-kn">import</span> <span class="tok-nn">fakeredis</span>
+<span class="tok-n">CACHES</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+    <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+        <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+            <span class="tok-s">&quot;REDIS_CLIENT_CLASS&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;fakeredis.FakeStrictRedis&quot;</span><span class="tok-p">,</span>
+        <span class="tok-p">}</span>
+    <span class="tok-p">}</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In case you want to flush all data from the cache after a test, add the
+following lines to your <code>TestCase</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span class="tok-k">def</span> <span class="tok-nf">tearDown</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+    <span class="tok-kn">from</span> <span class="tok-nn">django_redis</span> <span class="tok-kn">import</span> <span class="tok-n">get_redis_connection</span>
+    <span class="tok-n">get_redis_connection</span><span class="tok-p">(</span><span class="tok-s">&quot;default&quot;</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">flushall</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -398,8 +433,8 @@ is established.</p>
 <div class="sect2">
 <h3 id="_compression_support">3.3. Compression support</h3>
 <div class="paragraph">
-<p><em>django_redis</em> comes with compression support out of the box, but is deactivated by default. You
-can activate it setting <code>COMPRESS_MIN_LEN</code> option to any value great than <code>0</code>.</p>
+<p><em>django_redis</em> comes with compression support out of the box, but is deactivated by default.
+You can activate it setting up a concrete backend:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -407,15 +442,11 @@ can activate it setting <code>COMPRESS_MIN_LEN</code> option to any value great 
     <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
         <span class="tok-c"># ...</span>
         <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
-            <span class="tok-s">&quot;COMPRESS_MIN_LEN&quot;</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">,</span>
+            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressor.zlib.ZlibCompressor&quot;</span><span class="tok-p">,</span>
         <span class="tok-p">}</span>
     <span class="tok-p">}</span>
 <span class="tok-p">}</span></code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p><strong>zlib</strong> is used as default compression format. You can change it providing two callables, one for
-compress and an other for uncompress.</p>
 </div>
 <div class="paragraph">
 <p>Let see an example, of how make it work with <strong>lzma</strong> compression format:</p>
@@ -428,10 +459,7 @@ compress and an other for uncompress.</p>
     <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
         <span class="tok-c"># ...</span>
         <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
-            <span class="tok-s">&quot;COMPRESS_MIN_LEN&quot;</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">,</span>
-            <span class="tok-s">&quot;COMPRESS_COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-n">lzma</span><span class="tok-o">.</span><span class="tok-n">compress</span><span class="tok-p">,</span>
-            <span class="tok-s">&quot;COMPRESS_DECOMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-n">lzma</span><span class="tok-o">.</span><span class="tok-n">decompress</span><span class="tok-p">,</span>
-            <span class="tok-s">&quot;COMPRESS_DECOMPRESSOR_ERROR&quot;</span><span class="tok-p">:</span> <span class="tok-n">lzma</span><span class="tok-o">.</span><span class="tok-n">LZMAError</span>
+            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressor.lzma.LzmaCompressor&quot;</span><span class="tok-p">,</span>
         <span class="tok-p">}</span>
     <span class="tok-p">}</span>
 <span class="tok-p">}</span></code></pre>
@@ -489,7 +517,7 @@ default to <code>__name__</code> if no logger is specified and <code>DJANGO_REDI
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span class="tok-n">DJANGO_REDIS_IGNORE_EXCEPTIONS</span> <span class="tok-o">=</span> <span class="tok-s">&#39;some.specified.logger&#39;</span></code></pre>
+<pre class="pygments highlight"><code data-lang="python"><span class="tok-n">DJANGO_REDIS_LOGGER</span> <span class="tok-o">=</span> <span class="tok-s">&#39;some.specified.logger&#39;</span></code></pre>
 </div>
 </div>
 </div>
@@ -626,8 +654,8 @@ as the <code>keys</code> function and returns the number of deleted keys.</p>
 <div class="listingblock">
 <div class="title">Example use of delete_pattern</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-kn">from</span> <span class="tok-nn">django.core.cache</span> <span class="tok-kn">import</span> <span class="tok-n">cache</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_pattern</span><span class="tok-p">(</span><span class="tok-s">&quot;foo_*&quot;</span><span class="tok-p">)</span></code></pre>
+<pre class="pygments highlight"><code data-lang="pycon"><span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-kn">from</span> <span class="tok-nn">django.core.cache</span> <span class="tok-kn">import</span> <span class="tok-n">cache</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">delete_pattern</span><span class="tok-p">(</span><span class="tok-s">&quot;foo_*&quot;</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -643,13 +671,13 @@ as the <code>keys</code> function and returns the number of deleted keys.</p>
 <div class="listingblock">
 <div class="title">Example:</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-kn">from</span> <span class="tok-nn">django.core.cache</span> <span class="tok-kn">import</span> <span class="tok-n">cache</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;value1&quot;</span><span class="tok-p">,</span> <span class="tok-n">nx</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
-<span class="tok-bp">True</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;value2&quot;</span><span class="tok-p">,</span> <span class="tok-n">nx</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
-<span class="tok-bp">False</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">)</span>
-<span class="tok-s">&quot;value1&quot;</span></code></pre>
+<pre class="pygments highlight"><code data-lang="pycon"><span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-kn">from</span> <span class="tok-nn">django.core.cache</span> <span class="tok-kn">import</span> <span class="tok-n">cache</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;value1&quot;</span><span class="tok-p">,</span> <span class="tok-n">nx</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-go">True</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">set</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;value2&quot;</span><span class="tok-p">,</span> <span class="tok-n">nx</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-go">False</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">cache</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s">&quot;key&quot;</span><span class="tok-p">)</span>
+<span class="tok-go">&quot;value1&quot;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -667,10 +695,10 @@ reusing the cache connection string: <code>get_redis_connection(alias)</code>.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-kn">from</span> <span class="tok-nn">django_redis</span> <span class="tok-kn">import</span> <span class="tok-n">get_redis_connection</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">con</span> <span class="tok-o">=</span> <span class="tok-n">get_redis_connection</span><span class="tok-p">(</span><span class="tok-s">&quot;default&quot;</span><span class="tok-p">)</span>
-<span class="tok-o">&gt;&gt;&gt;</span> <span class="tok-n">con</span>
-<span class="tok-o">&lt;</span><span class="tok-n">redis</span><span class="tok-o">.</span><span class="tok-n">client</span><span class="tok-o">.</span><span class="tok-n">StrictRedis</span> <span class="tok-nb">object</span> <span class="tok-n">at</span> <span class="tok-mh">0x2dc4510</span><span class="tok-o">&gt;</span></code></pre>
+<pre class="pygments highlight"><code data-lang="pycon"><span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-kn">from</span> <span class="tok-nn">django_redis</span> <span class="tok-kn">import</span> <span class="tok-n">get_redis_connection</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">con</span> <span class="tok-o">=</span> <span class="tok-n">get_redis_connection</span><span class="tok-p">(</span><span class="tok-s">&quot;default&quot;</span><span class="tok-p">)</span>
+<span class="tok-gp">&gt;&gt;&gt; </span><span class="tok-n">con</span>
+<span class="tok-go">&lt;redis.client.StrictRedis object at 0x2dc4510&gt;</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -989,6 +1017,32 @@ also available.</p>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_pluggable_redis_client">3.17. Pluggable redis client</h3>
+<div class="paragraph">
+<p><em>django_redis</em> uses the Redis client <code>redis.client.StrictClient</code> by default.
+It is possible to use an alternative client, for example <code>fakeredis</code> for
+testing purpose (see <a href="#_testing_with_django_redis">Testing with django-redis</a>).</p>
+</div>
+<div class="paragraph">
+<p>You can customize the client used by setting <code>REDIS_CLIENT_CLASS</code> in the
+<code>CACHES</code> setting. Optionally, you can provide arguments to this class
+by setting <code>REDIS_CLIENT_KWARGS</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example setup</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span class="tok-n">CACHES</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+    <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+        <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+            <span class="tok-s">&quot;REDIS_CLIENT_CLASS&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;my.module.ClientClass&quot;</span><span class="tok-p">,</span>
+            <span class="tok-s">&quot;REDIS_CLIENT_KWARGS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span><span class="tok-s">&quot;some_setting&quot;</span><span class="tok-p">:</span> <span class="tok-bp">True</span><span class="tok-p">},</span>
+        <span class="tok-p">}</span>
+    <span class="tok-p">}</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1029,7 +1083,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-08-31 00:44:58 EEST
+Last updated 2016-04-12 08:14:49 EEST
 </div>
 </div>
 </body>
