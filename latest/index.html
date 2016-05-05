@@ -80,7 +80,7 @@
 <h1>django-redis documentation</h1>
 <div class="details">
 <span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.be&gt;</span><br>
-<span id="revdate">4.4.0</span>
+<span id="revdate">4.4.2</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -442,7 +442,7 @@ You can activate it setting up a concrete backend:</p>
     <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
         <span class="tok-c"># ...</span>
         <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
-            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressor.zlib.ZlibCompressor&quot;</span><span class="tok-p">,</span>
+            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressors.zlib.ZlibCompressor&quot;</span><span class="tok-p">,</span>
         <span class="tok-p">}</span>
     <span class="tok-p">}</span>
 <span class="tok-p">}</span></code></pre>
@@ -459,7 +459,7 @@ You can activate it setting up a concrete backend:</p>
     <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
         <span class="tok-c"># ...</span>
         <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
-            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressor.lzma.LzmaCompressor&quot;</span><span class="tok-p">,</span>
+            <span class="tok-s">&quot;COMPRESSOR&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.compressors.lzma.LzmaCompressor&quot;</span><span class="tok-p">,</span>
         <span class="tok-p">}</span>
     <span class="tok-p">}</span>
 <span class="tok-p">}</span></code></pre>
@@ -1083,7 +1083,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-04-13 10:43:33 EEST
+Last updated 2016-05-05 20:10:00 EEST
 </div>
 </div>
 </body>
