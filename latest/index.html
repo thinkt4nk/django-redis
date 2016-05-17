@@ -80,7 +80,7 @@
 <h1>django-redis documentation</h1>
 <div class="details">
 <span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.be&gt;</span><br>
-<span id="revdate">4.4.2</span>
+<span id="revdate">4.4.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -187,7 +187,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Supported stable version: <strong>4.4.0</strong></p>
+<p>Supported stable version: <strong>4.4.3</strong></p>
 </li>
 <li>
 <p>Supported stable version: <strong>3.8.4</strong></p>
@@ -554,13 +554,13 @@ as django backend contract specifies:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>ttl value for any volatile key (any key that has expiration)</p>
+<p>0 if key does not exists (or already expired).</p>
 </li>
 <li>
-<p>0 for expired and not existent keys</p>
+<p>None for keys that exists but does not have any expiration.</p>
 </li>
 <li>
-<p>None for keys that does not have expiration</p>
+<p>ttl value for any volatile key (any key that has expiration).</p>
 </li>
 </ul>
 </div>
@@ -1083,7 +1083,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-05-05 20:10:00 EEST
+Last updated 2016-05-17 13:34:47 EEST
 </div>
 </div>
 </body>
