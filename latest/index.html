@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.4">
+<meta name="generator" content="Asciidoctor 1.5.5">
 <meta name="author" content="Andrey Antukh, &lt;niwi@niwi.be&gt;">
 <title>django-redis documentation</title>
 <style>
 .listingblock .pygments .hll { background-color: #ffffcc }
-.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments, .listingblock .pygments code { background: #f0f0f0; }
 .listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
 .listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 .listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
@@ -80,7 +80,7 @@
 <h1>django-redis documentation</h1>
 <div class="details">
 <span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.be&gt;</span><br>
-<span id="revdate">4.4.4</span>
+<span id="revdate">4.6.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -187,7 +187,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Supported stable version: <strong>4.4.4</strong></p>
+<p>Supported stable version: <strong>4.6.0</strong></p>
 </li>
 <li>
 <p>Supported stable version: <strong>3.8.4</strong></p>
@@ -217,7 +217,7 @@ fix releases and are should contain only bug fixes. No new features.</p>
 <p><strong>django-redis 3.8.x</strong> will maintain support for django 1.4, 1.5, 1.6, 1.7 (and maybe 1.8)</p>
 </li>
 <li>
-<p><strong>django-redis 4.4.x</strong> will maintain support for django 1.6, 1.7, 1.8 and 1.9</p>
+<p><strong>django-redis 4.4.x</strong> will maintain support for django 1.6, 1.7, 1.8, 1.9 and 1.10</p>
 </li>
 </ul>
 </div>
@@ -317,19 +317,28 @@ unix://[:password]@/path/to/socket.sock?db=0</pre>
 </li>
 </ul>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-if you are coming fron django-redis &lt; 3.8.x, you are probably using redis_cache. Since
-django-redis 3.8.x, <code>redis_cache</code> module is deprecated in favor to <code>django_redis</code>. The
-<code>redis_cache</code> module will be removed in 3.9.x versions.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>In some circumstances the password you should use to connect redis
+is not URL-safe, in this case you can escape it or just use the
+convenience option in <code>OPTIONS</code> dict:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span class="tok-n">CACHES</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+    <span class="tok-s">&quot;default&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+        <span class="tok-s">&quot;BACKEND&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.cache.RedisCache&quot;</span><span class="tok-p">,</span>
+        <span class="tok-s">&quot;LOCATION&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;redis://127.0.0.1:6379/1&quot;</span><span class="tok-p">,</span>
+        <span class="tok-s">&quot;OPTIONS&quot;</span><span class="tok-p">:</span> <span class="tok-p">{</span>
+            <span class="tok-s">&quot;CLIENT_CLASS&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;django_redis.client.DefaultClient&quot;</span><span class="tok-p">,</span>
+            <span class="tok-s">&quot;PASSWORD&quot;</span><span class="tok-p">:</span> <span class="tok-s">&quot;mysecret&quot;</span>
+        <span class="tok-p">}</span>
+    <span class="tok-p">}</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Take care, that this option does not overwrites the password in the uri, so if you
+have set the password in the uri, this settings will be ignored.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1083,7 +1092,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-07-25 15:22:36 EEST
+Last updated 2017-01-02 09:46:57 CET
 </div>
 </div>
 </body>
