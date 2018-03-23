@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-VERSION = (4, 8, 0)
-__version__ = '.'.join(map(str, VERSION))
+__version__ = '4.8.0.ambition'
 
 
 def get_redis_connection(alias='default', write=True):
